@@ -1,0 +1,22 @@
+{
+  "id": "modern_exp_share",
+  "name": "Modern Exp. Share (Gen 3)",
+  "version": "1.0.0",
+  "api": 3,
+  "games": [
+    "gen3"
+  ],
+  "entry": "main.lua",
+  "profile": "content",
+  "category": "GAMEPLAY",
+  "game_version": ">=0.0.0-0 <2.0.0",
+  "priority": 100,
+  "dependencies": [],
+  "optional_dependencies": [],
+  "conflicts": [],
+  "permissions": [
+    "engine_internals"
+  ],
+  "description": "Gen 6+ style Exp. Share for FireRed, LeafGreen, Ruby, Sapphire and Emerald: the whole team earns experience, fighters keep their full share, and one summary line replaces the per-Pokemon messages.",
+  "github": "Tooandorisu/Modern-EXP-Share"
+}
