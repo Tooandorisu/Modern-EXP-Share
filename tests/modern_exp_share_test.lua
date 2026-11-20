@@ -238,6 +238,34 @@ for _, version in ipairs({ "firered", "leafgreen", "ruby", "sapphire", "emerald"
     Battle.startPostCatchFlow({ success = true, mon = st.enemy.mon, location = "party" })
     T.eq(st.playerParty[1].exp, before1, version .. " catch EXP can be turned off")
   end)
+
+  exercise(version, "partner's Pokemon are not your team", function()
+    local st = setup(version)
+    st.playerHalf = 1
+    local awards = Experience.awardFoe(st, st.enemy, { trainer = false })
+    T.eq(#awards, 1, version .. " slot 2 belongs to the partner and is skipped")
+  end)
+
+  exercise(version, "scripted battles stay vanilla", function()
+    local st = setup(version)
+    st.pokedude = true
+    T.eq(#Experience.awardFoe(st, st.enemy, { trainer = false }), 1,
+      version .. " Pokedude battle: no team share")
+    teardown()
+    st = setup(version)
+    st.kinds = st.kinds or {}
+    st.kinds.tutorial = "wally"
+    T.eq(#Experience.awardFoe(st, st.enemy, { trainer = false }), 1,
+      version .. " tutorial battle: no team share")
+  end)
+
+  exercise(version, "no catch EXP in the Safari Zone", function()
+    local st = setup(version)
+    st.safari = true
+    local before = st.playerParty[1].exp
+    Battle.startPostCatchFlow({ success = true, mon = st.enemy.mon, location = "party" })
+    T.eq(st.playerParty[1].exp, before, version .. " safari catch pays nothing")
+  end)
 end
 
 Version.set(savedVersion)

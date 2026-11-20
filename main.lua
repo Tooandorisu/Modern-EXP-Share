@@ -39,7 +39,6 @@ local TEXT = {
   summary = "The rest of your team\ngained EXP. Points!",
 }
 
-mod.exports.version = "1.0.0"
 mod.exports.setText = function(key, value)
   if TEXT[key] ~= nil and type(value) == "string" and value ~= "" then
     TEXT[key] = value
@@ -91,7 +90,24 @@ local function ownsExpShare(st)
   return false
 end
 
+-- Scripted demos keep their vanilla flow: the Pokedude's lessons, the old
+-- man's and Wally's catching tutorials.
+local function scripted(st)
+  if not st then return true end
+  if st.pokedude or st.oldManTutorial then return true end
+  local kinds = st.kinds
+  return type(kinds) == "table" and kinds.tutorial ~= nil and kinds.tutorial ~= false
+end
+
+-- In a partner battle (Steven at Mossdeep) the partner's Pokemon sit in
+-- playerParty after slot playerHalf.  They are not the player's team.
+local function ownSlot(st, pi)
+  local half = tonumber(st.playerHalf)
+  return half == nil or pi <= half
+end
+
 local function active(st)
+  if scripted(st) then return false end
   if not opt("enabled") then return false end
   if opt("needs_item") and not ownsExpShare(st) then return false end
   return true
@@ -216,7 +232,7 @@ mod.hooks:wrap("battle.exp_award", function(next, ctx)
       end
     end
     for pi = 1, 6 do
-      if not fighters[pi] and canGain(party[pi]) then
+      if not fighters[pi] and ownSlot(st, pi) and canGain(party[pi]) then
         plan.roles[pi] = "team"
         ctx.applyShare(party[pi], 1, announceTeam)
       end
@@ -240,7 +256,8 @@ end)
 
 mod.hooks:wrap("battle.catch_exp", function(next, ctx)
   local st = ctx and ctx.battle
-  if opt("catch_exp") and active(st) then return true end
+  -- Safari Zone catches stay EXP-free: no Pokemon of yours is out there.
+  if opt("catch_exp") and active(st) and not st.safari then return true end
   return next(ctx)
 end)
 
